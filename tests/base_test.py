@@ -7,20 +7,21 @@ import ftfy
 spark = SparkSession.builder.appName("SimplePySparkExample").getOrCreate()
 
 # 自定义 Python UDF，用于处理特殊字符
-def fix_text(text):
+def fix_text_udf_func(text):
     return ftfy.fix_text(text).strip() if text else ""
 
 # 注册 UDF，指定返回类型为 StringType()
-fix_text_udf = udf(fix_text, StringType())
+fix_text_udf = udf(fix_text_udf_func, StringType())
 
-# 读取本地文本文件
-text_file = spark.read.text("/app/data/example.txt")
+# 使用 range 生成一个 DataFrame
+# 创建一个包含整数的 DataFrame
+df = spark.range(0, 10).selectExpr("cast(id as string) as value")
 
 # 应用 UDF 处理文本
-processed_lines = text_file.withColumn("fixed_text", fix_text_udf(text_file.value))
+df = df.withColumn("col_text", fix_text_udf(df.value))
 
-# 过滤掉空字符串
-filtered_lines = processed_lines.filter(processed_lines.fixed_text != "hello")
+# 过滤掉包含 "hello" 的字符串
+filtered_lines = df.filter(df.col_text != "")
 
 # 输出执行计划（用于调试）
 filtered_lines.explain(True)
