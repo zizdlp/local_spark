@@ -15,5 +15,7 @@ set_env:
 	export SPARK_HOME=/app/spark
 	export PATH=$SPARK_HOME/bin:$PATH
 local_test:
-	spark-submit --master local[4] tests/base_test.py > logs/base_test.log 2>&1
+	spark-submit --master local[4] \
+		--conf spark.sql.optimizer.excludedRules="PushDownPredicates,PruneFilters,PushProjectionThroughUnion,PushProjectionThroughLimit,ReorderJoin,EliminateOuterJoin,PushDownLeftSemiAntiJoin,PushLeftSemiLeftAntiThroughJoin,OptimizeJoinCondition,LimitPushDown,LimitPushDownThroughWindow,ColumnPruning,GenerateOptimization,InferFiltersFromConstraints,OptimizeIn" \
+	 	tests/base_test.py > logs/base_test.log 2>&1
 	cat logs/base_test.log | grep "mydebug:"
