@@ -20,7 +20,8 @@ jobs:
       - name: Build and push local_spark
         uses: docker/build-push-action@v6
         with:
-          context: "."
+          context: "{{defaultContext}}:build"
+          file: Dockerfile
           platforms: linux/amd64
           push: true
           tags: zizdlp/local_spark
